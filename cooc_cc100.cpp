@@ -366,15 +366,13 @@ static void pass2_worker(const Args& args,
 
       const int W = args.window;
       for (size_t t = 0; t < ids.size(); t++) {
-        uint32_t c = ids[t];
-        size_t left = (t > (size_t)W) ? (t - (size_t)W) : 0;
-        size_t right = std::min(ids.size() - 1, t + (size_t)W);
-        for (size_t u = left; u <= right; u++) {
-          if (u == t) continue;
-          uint32_t k = ids[u];
-          if (args.skip_diag && c == k) continue;
-          map.add(pack_key(c, k), 1);
-          map.add(pack_key(k, c), 1);
+        uint32_t i = ids[t];
+        size_t right = std::min(ids.size(), t + (size_t)W + 1);
+        for (size_t u = t + 1; u < right; u++) {
+          uint32_t j = ids[u];
+          if (args.skip_diag && i == j) continue;
+          map.add(pack_key(i, j), 1);
+          map.add(pack_key(j, i), 1);
         }
         if (map.size() >= args.flush_entries) {
           map.to_vector(dump);
